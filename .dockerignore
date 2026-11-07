@@ -1,0 +1,6 @@
+.git
+.idea
+.env
+node_modules
+web/node_modules
+web/dist
