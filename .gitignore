@@ -41,3 +41,13 @@ web/.vite/
 server
 *.tsbuildinfo
 .env
+
+# Local IDE metadata and environment files
+.idea/
+.vscode/
+.env.*
+!.env.example
+
+# Local build artifacts
+/dist/
+*.tsbuildinfo
