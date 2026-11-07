@@ -1,7 +1,10 @@
 package main
 
 import (
-	"encoding/json"
+	"github.com/kryvna/go-weather/internal/api"
+	"github.com/kryvna/go-weather/internal/city"
+	"github.com/kryvna/go-weather/internal/config"
+	"github.com/kryvna/go-weather/internal/weather"
 	"log/slog"
 	"net/http"
 	"os"
@@ -9,27 +12,30 @@ import (
 )
 
 func main() {
+	cfg := config.Load()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		w.Write([]byte(`{"status":"ok"}`))
 	})
-
-	mux.Handle("GET /", http.FileServer(http.Dir(env("WEB_DIST", "web/dist"))))
-
-	addr := ":" + env("PORT", "8080")
-	server := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
+	api.New(weather.NewClient(), city.NewClient()).Register(mux)
+	mux.Handle("GET /", http.FileServer(http.Dir(cfg.WebDist)))
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", cfg.AllowedOrigin)
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(204)
+			return
+		}
+		mux.ServeHTTP(w, r)
+	})
+	addr := ":" + cfg.Port
+	s := &http.Server{Addr: addr, Handler: handler, ReadHeaderTimeout: 5 * time.Second}
 	logger.Info("server starting", "addr", addr)
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logger.Error("server failed", "error", err)
+	if e := s.ListenAndServe(); e != nil && e != http.ErrServerClosed {
+		logger.Error("server failed", "error", e)
 		os.Exit(1)
 	}
-}
-
-func env(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return fallback
 }
