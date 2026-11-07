@@ -2,6 +2,8 @@ FROM golang:1.23-alpine AS backend-build
 WORKDIR /app
 COPY go.mod go.sum ./
 COPY cmd ./cmd
+COPY internal ./internal
+COPY migrations ./migrations
 RUN CGO_ENABLED=0 go build -o /server ./cmd/server
 
 FROM node:22-alpine AS frontend-build
