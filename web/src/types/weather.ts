@@ -1,0 +1,5 @@
+export type City = { name: string; country: string; region?: string; latitude: number; longitude: number; timezone: string };
+export type CurrentWeather = { temperature: number; relativeHumidity: number; apparentTemperature: number; isDay: boolean; precipitation: number; weatherCode: number; cloudCover: number; pressure: number; windSpeed: number; windDirection: number; windGusts: number };
+export type Hour = { time: string; temperature: number; apparentTemperature: number; humidity: number; precipitationProbability: number; precipitation: number; weatherCode: number; windSpeed: number; pressure: number; uvIndex: number; visibility: number; dewPoint: number };
+export type Day = { date: string; weatherCode: number; temperatureMax: number; temperatureMin: number; sunrise: string; sunset: string; daylightDuration: number; uvIndexMax: number; precipitationSum: number; precipitationProbabilityMax: number; windSpeedMax: number };
+export type Overview = { current: CurrentWeather; hourly: Hour[]; daily: Day[]; timezone: string; updated: string };
