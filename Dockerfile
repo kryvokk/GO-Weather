@@ -1,6 +1,6 @@
 FROM golang:1.23-alpine AS backend-build
 WORKDIR /app
-COPY go.mod ./
+COPY go.mod go.sum ./
 COPY cmd ./cmd
 RUN CGO_ENABLED=0 go build -o /server ./cmd/server
 
