@@ -7,7 +7,7 @@ RUN CGO_ENABLED=0 go build -o /server ./cmd/server
 FROM node:22-alpine AS frontend-build
 WORKDIR /app
 COPY web/package*.json ./
-RUN npm install
+RUN npm ci
 COPY web ./
 RUN npm run build
 

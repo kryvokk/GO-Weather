@@ -31,3 +31,9 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Frontend dependencies and build output
+node_modules/
+web/node_modules/
+web/dist/
+web/.vite/

@@ -16,6 +16,8 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
+	mux.Handle("GET /", http.FileServer(http.Dir(env("WEB_DIST", "web/dist"))))
+
 	addr := ":" + env("PORT", "8080")
 	server := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
 	logger.Info("server starting", "addr", addr)
@@ -26,6 +28,8 @@ func main() {
 }
 
 func env(key, fallback string) string {
-	if value := os.Getenv(key); value != "" { return value }
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
 	return fallback
 }
