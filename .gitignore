@@ -40,3 +40,4 @@ web/.vite/
 
 server
 *.tsbuildinfo
+.env
