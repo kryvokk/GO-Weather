@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"github.com/kryvna/go-weather/internal/api"
 	"github.com/kryvna/go-weather/internal/city"
 	"github.com/kryvna/go-weather/internal/config"
+	"github.com/kryvna/go-weather/internal/database"
+	"github.com/kryvna/go-weather/internal/settings"
 	"github.com/kryvna/go-weather/internal/weather"
 	"log/slog"
 	"net/http"
@@ -19,7 +22,19 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status":"ok"}`))
 	})
-	api.New(weather.NewClient(), city.NewClient()).Register(mux)
+	apiHandler := api.New(weather.NewClient(), city.NewClient())
+	if cfg.DatabaseURL != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		db, err := database.Connect(ctx, cfg.DatabaseURL)
+		cancel()
+		if err != nil {
+			logger.Error("database connection failed", "error", err)
+			os.Exit(1)
+		}
+		defer db.Close()
+		apiHandler.WithPersistence(city.NewRepository(db.Pool), settings.NewRepository(db.Pool))
+	}
+	apiHandler.Register(mux)
 	mux.Handle("GET /", http.FileServer(http.Dir(cfg.WebDist)))
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", cfg.AllowedOrigin)
