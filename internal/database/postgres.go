@@ -44,7 +44,7 @@ func (db *DB) Migrate(ctx context.Context) error {
 	if _, err := db.Pool.Exec(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())`); err != nil {
 		return err
 	}
-	entries, err := migrations.ReadDir("../../migrations")
+	entries, err := migrations.ReadDir("migrations")
 	if err != nil {
 		return err
 	}
